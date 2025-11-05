@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Company Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            font-size: 12px;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        /* Images are embedded as base64 in the html for PDF generation */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Company Status Report</h1>
+    <p>Generated on: {{ moment().format('MMMM Do YYYY, h:mm a') }}</p> <!-- Requires flask-moment if you use it, otherwise remove -->
+
+    <div class="section">
+        <h2>Sales Performance Visualization</h2>
+        {{ graph_html | safe }}
+    </div>
+
+    <div class="section">
+        <h2>AI-Powered Insights</h2>
+        {{ insights_html | safe }}
+    </div>
+
+    <div class="section">
+        <h2>Simulation Results</h2>
+        {{ simulation_html | safe }}
+    </div>
+
+    <hr>
+    <footer>Data summary included below: (Full data download available on web platform)</footer>
+</body>
+</html>

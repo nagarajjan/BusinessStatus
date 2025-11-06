@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Status Dashboard</title>
+    <!-- Simple CSS styling is provided below -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+
+        .form-group {
+            margin-top: 15px;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 8px;
+            margin-right: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .download-btn {
+            background-color: #28a745;
+            margin-left: 10px;
+        }
+
+            .download-btn:hover {
+                background-color: #218838;
+            }
+
+        .data-table {
+            margin-top: 15px;
+        }
+
+            .data-table table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .data-table th, .data-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+
+            .data-table th {
+                background-color: #f2f2f2;
+            }
+        /* CSS for Flash Messages */
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Company Status Dashboard</h1>
+
+        <!-- Flash Messages Display -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <!-- Navigation/Action Buttons -->
+        <a href="{{ url_for('upload_file_page') }}"><button>Upload New Data</button></a>
+        <a href="{{ url_for('download_excel_report') }}"><button class="download-btn">Download Report (Excel XLSX)</button></a>
+
+        <!-- Section 1: Data Visualization -->
+        <div class="section">
+            <h2>Sales Performance Visualization</h2>
+            {{ graph_html | safe }}
+        </div>
+
+        <!-- Section 2: Web Scraping Tools & Results -->
+        <div class="section">
+            <h2>Market Intelligence & Scraping</h2>
+
+            <!-- Scrape Product Form -->
+            <form method="POST" action="{{ url_for('scrape_product_route') }}" class="form-group">
+                <label for="product_url">Scrape a specific product URL:</label><br>
+                <input type="text" id="product_url" name="product_url" placeholder="Enter full URL (e.g., https://example.com/product)">
+                <button type="submit">Scrape Product</button>
+            </form>
+
+            <!-- Display Scraped Product Data -->
+            <!-- Display Scraped Product Data -->
+            {% if product_data %}
+            <div class="data-table">
+                <h3>Scraped Product Details History</h3>
+                <table>
+                    <!-- Table Header (Assuming consistent keys in the dicts) -->
+                    <tr>
+                        <th>URL</th>
+                        <th>Title</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+
+                    <!-- Loop through every record in the list -->
+                    {% for record in product_data %}
+                    <tr>
+                        <td>{{ record['URL'] }}</td>
+                        <td>{{ record['Title'] }}</td>
+                        <td>{{ record['Price'] }}</td>
+                        <td>{{ record['Status'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+
+
+            <!-- Scrape Competitors Form -->
+            <form method="POST" action="{{ url_for('scrape_competitors_route') }}" class="form-group">
+                <label for="competitors_url">Scrape a competitor listing URL:</label><br>
+                <input type="text" id="competitors_url" name="competitors_url" placeholder="Enter full URL (e.g., https://example.com/competitors)">
+                <button type="submit">Scrape Competitors</button>
+            </form>
+
+            <!-- Display Scraped Competitors Data -->
+            {% if competitors_data %}
+            <div class="data-table">
+                <h3>Scraped Competitors List</h3>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                    </tr>
+                    {% for comp in competitors_data %}
+                    <tr>
+                        <td>{{ comp['Name'] }}</td>
+                        <td>{{ comp['Price'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Section 3: AI Generated Insights -->
+        <div class="section">
+            <h2>AI-Powered Insights</h2>
+            {{ insights_html | safe }}
+        </div>
+        <!-- Display Scraped Competitors Data -->
+        {% if competitors_data %}
+        <div class="data-table">
+            <h3>Scraped Competitors List</h3>
+            <table>
+                <!-- Table Header -->
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                </tr>
+
+                <!-- Loop through every record in the list -->
+                {% for comp in competitors_data %}
+                <tr>
+                    <!-- Ensure these keys match the keys in your app.py list of dicts -->
+                    <td>{{ comp['Name'] }}</td>
+                    <td>{{ comp['Price'] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Section 4: Simulation Interface -->
+        <div class="section">
+            <h2>Run a Simulation</h2>
+            <form method="POST" action="{{ url_for('dashboard') }}" class="form-group">
+                <label for="scenario_text">Describe a scenario to simulate:</label><br>
+                <textarea id="scenario_text" name="scenario_text" rows="4" placeholder="e.g., 'What happens if competitor X lowers their price by 10%?'"></textarea><br>
+                <button type="submit">Run Simulation</button>
+            </form>
+            <h3>Simulation Results</h3>
+            {{ simulation_html | safe }}
+        </div>
+    </div>
+</body>
+</html>

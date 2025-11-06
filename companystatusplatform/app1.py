@@ -25,6 +25,65 @@ def scrape_everything(name, cik):
     print(f"Scraping data for {name} ({cik})...")
     return "Scraped data placeholder text."
 
+# app.py
+
+# ... (rest of imports)
+
+# ... (global variables)
+
+# --- Helper Functions ---
+
+# ... (scrape_everything, generate_insights, create_sample_excel functions) ...
+
+
+# app.py
+
+# ... (keep existing imports and global variables) ...
+
+def run_simulation(df, scenario): 
+    """
+    Analyzes the scenario text and calculates a new result based on the DataFrame (df).
+    Uses flexible keyword matching for the scenario.
+    """
+    print(f"Running simulation for: {scenario}")
+    
+    scenario_lower = scenario.lower()
+
+    # Make the keyword checking more flexible:
+    has_smartphone = 'smartphone' in scenario_lower
+    has_price_increase = 'price increased' in scenario_lower or '10% increased' in scenario_lower or 'price up' in scenario_lower
+    
+    # Check if the required conditions are met
+    if has_smartphone and has_price_increase:
+        # Calculate new potential sales based on this simple scenario
+        current_sales_north = df[(df['Product'] == 'Smartphone') & (df['Market'] == 'North')]['Sales'].sum()
+        current_sales_south = df[(df['Product'] == 'Smartphone') & (df['Market'] == 'South')]['Sales'].sum()
+        
+        # Simple assumption: 10% price increase leads to 5% sales decrease in North, 8% decrease in South
+        new_sales_north = current_sales_north * (1 - 0.05)
+        new_sales_south = current_sales_south * (1 - 0.08)
+        
+        # Calculate percentage changes
+        perc_change_north = ((new_sales_north - current_sales_north) / current_sales_north) * 100
+        perc_change_south = ((new_sales_south - current_sales_south) / current_sales_south) * 100
+        
+        result_text = (
+            f"**Scenario Simulated:** *{scenario}*\n\n"
+            f"**Result:** \n"
+            f"- North Market Smartphone Sales Change: {perc_change_north:.2f}%\n"
+            f"- South Market Smartphone Sales Change: {perc_change_south:.2f}%"
+        )
+        
+        return result_text
+    else:
+        # Default fallback message if the scenario isn't recognized by the simple logic
+        return f"**Scenario Simulated:** *{scenario}*\n\n**Result:** The simulation logic could not fully process this request (lacks specific logic for '{scenario}')."
+
+# ... (rest of the app.py code) ...
+
+
+# ... (rest of the app.py code) ...
+
 def generate_insights(df, data): 
     print("Generating insights...")
     return "**Summary of Findings:**\n* Sales look good.\n* South market is competitive."

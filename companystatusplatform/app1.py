@@ -39,6 +39,7 @@ def create_sample_excel():
         'Product': ['Laptop', 'Laptop', 'Smartphone', 'Smartphone', 'Laptop', 'Smartphone'],
         'Market': ['North', 'South', 'North', 'South', 'North', 'South'],
         'Zone': ['Zone A', 'Zone B', 'Zone A', 'Zone B', 'Zone A', 'Zone B'],
+        # Corrected these lines with actual data:
         'Sales': [12000, 8500, 15000, 9200, 11000, 14500],
         'Profit': [3000, 1500, 4500, 2100, 2800, 4200],
         'Year': [2021, 2021, 2022, 2022, 2023, 2023]
@@ -47,6 +48,7 @@ def create_sample_excel():
     file_path = 'static/Sample_Data.xlsx'
     df_sample.to_excel(file_path, index=False)
     return file_path
+
 # --- End Helper Functions ---
 
 
@@ -117,7 +119,7 @@ def upload_file():
     if file and (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
         try:
             global_df = pd.read_excel(file)
-            global_scraped_data_text = "" # Placeholder
+            global_scraped_data_text = "" 
             return redirect(url_for('dashboard'))
         except Exception as e:
             flash(f"Error processing file: {e}", "error")
@@ -128,12 +130,11 @@ def upload_file():
 
 @app.route('/scrape_product', methods=['POST'])
 def scrape_product_route():
-    # Fix: Added def for the function and corrected global access
     global global_scraped_product_data
     url = request.form.get('product_url')
     if url:
         result = scrape_product_info(url)
-        global_scraped_product_data.append(result) # Append to list
+        global_scraped_product_data.append(result)
         flash(f"Scraped product information from {url}", "success")
     else:
         flash("Please provide a valid URL.", "error")
@@ -162,37 +163,19 @@ def dashboard():
     # Handle simulation request POST request
     if request.method == 'POST' and 'scenario_text' in request.form:
         scenario = request.form['scenario_text']
-        # global_simulation_result = "Simulation results placeholder."
         global_simulation_result = run_simulation(global_df, scenario)
-        # Add a flash message to confirm it ran
         flash("Simulation run successfully!", "success")
-        # Note: If you don't redirect here, the POST data is processed. 
-        # The subsequent GET will use the newly updated global variable.
     
-    # ... (Generate Plotly Chart logic) ...
+    # --- FIX FOR UnboundLocalError: Initialize graph_html first ---
+    graph_html = "<p>Data visualization is not available because required columns are missing.</p>"
 
-    # Render insights markdown to HTML
-    insights_html = markdown.markdown(global_insights if global_insights else "No insights generated yet.")
-    # This line processes the *current* value of global_simulation_result
-    simulation_html = markdown.markdown(global_simulation_result if global_simulation_result else "Run a simulation below.")
-
-    return render_template('dashboard1.html', 
-                           graph_html=graph_html, 
-                           insights_html=insights_html,
-                           simulation_html=simulation_html)
-
-
-        
-        
-    
-    # Generate Plotly Chart
+    # Generate Plotly Chart if columns exist
     if all(col in global_df.columns for col in ['Product', 'Sales', 'Market']):
         agg_data = global_df.groupby(['Product', 'Market'])['Sales'].sum().reset_index()
         fig = px.bar(agg_data, x="Product", y="Sales", color="Market", barmode="group",
                      title="Sales Performance by Product and Market")
         graph_html = pio.to_html(fig, full_html=False)
-    else:
-        graph_html = "<p>Required columns ('Product', 'Sales', 'Market') not found for visualization.</p>"
+    # The 'else' case is now handled by the initial assignment above
 
     # Render insights markdown to HTML
     insights_html = markdown.markdown(global_insights if global_insights else "No insights generated yet.")
@@ -201,7 +184,6 @@ def dashboard():
     product_data = global_scraped_product_data
     competitors_data = global_scraped_competitors_data
     
-    # Fix: Corrected the template name back to dashboard.html
     return render_template('dashboard1.html', 
                            graph_html=graph_html, 
                            insights_html=insights_html,
@@ -223,13 +205,11 @@ def download_excel_report():
         if global_scraped_competitors_data:
             comp_df = pd.DataFrame(global_scraped_competitors_data)
             comp_df.to_excel(writer, sheet_name='Competitors', index=False)
-        # Add the multi-product data to a sheet
         if global_scraped_product_data:
             prod_df = pd.DataFrame(global_scraped_product_data)
             prod_df.to_excel(writer, sheet_name='Scraped Products', index=False)
 
     buffer.seek(0)
-    # Fix: Added the closing return statement
     return send_file(buffer, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', as_attachment=True, download_name='company_status_report.xlsx')
 
 @app.route('/download_report')
